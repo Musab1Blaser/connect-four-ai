@@ -16,11 +16,13 @@ def draw_circles(board_sprite, game_state):
 
             pygame.draw.circle(board_sprite, color, (100*j+50, 100*i+50), 40) # 50, 150, ..., 650 -> last pix: 700
 
-def draw_board(screen, board_sprite, board_rect, game_state, new_circle_pos = (), turn = 1):
+def draw_board(screen, player_names, player_rect, board_sprite, board_rect, game_state, new_circle_pos = (), turn = 1):
     bg_color = (0, 0x23, 0x28)
     board_color = (0, 0x54, 0x61)
 
     screen.fill(bg_color)
+
+    screen.blit(player_names, player_rect)
 
     if turn == 1:
         ball_color = (0xde, 0x04, 0x04) # player 1 = red
@@ -48,6 +50,25 @@ def run_game(strat1, start_name1,  strat2, strat_name2): # provide the two strat
     screen = pygame.display.set_mode((700, 900)) # create screen
     screen.fill(bg_color)
 
+    # Player Names
+    font = pygame.font.Font(None, 50)
+
+    # Names Canvas
+    player_names = pygame.Surface((700, 200), pygame.SRCALPHA)
+    player_rect = player_names.get_rect(topleft = (0, 0))
+
+    # Player 1 Canvas
+    player1 = font.render(start_name1, True, (0xde, 0x04, 0x04))
+    player1_rect = player1.get_rect(topleft = (20, 20))
+    
+    # Player 2 Canvas
+    player2 = font.render(strat_name2, True, (0xe2, 0xd7, 0x0c))
+    player2_rect = player1.get_rect(topright = (680, 20))
+
+    # Placing names on Names Canvas
+    player_names.blit(player1, player1_rect)
+    player_names.blit(player2, player2_rect)
+
     board_sprite = pygame.Surface((700, 600), pygame.SRCALPHA) # create board with background
     board_rect = board_sprite.get_rect(topleft = (0, 300))
 
@@ -64,13 +85,13 @@ def run_game(strat1, start_name1,  strat2, strat_name2): # provide the two strat
                     move_list.append((i, j))
                     break
 
-        draw_board(screen, board_sprite, board_rect, game_state) # show base screen
+        draw_board(screen, player_names, player_rect, board_sprite, board_rect, game_state) # show base screen
         
         if len(move_list): # if there are moves left to make, pass game to strategy functions
             if turn == 1:
                 i, j = strat1(game_state, move_list) # determine move
                 for r in range(100, 350 + 100 * i, 4): # animate ball falling
-                    draw_board(screen, board_sprite, board_rect, game_state, (50 + 100*j, r), turn)
+                    draw_board(screen, player_names, player_rect, board_sprite, board_rect, game_state, (50 + 100*j, r), turn)
                     pygame.display.update() # update screen to show animation step
 
                 game_state[i][j] = turn
@@ -79,7 +100,7 @@ def run_game(strat1, start_name1,  strat2, strat_name2): # provide the two strat
             elif turn == 2:
                 i, j = strat2(game_state, move_list) # determine move
                 for r in range(100, 350 + 100 * i, 4): # animate ball falling
-                    draw_board(screen, board_sprite, board_rect, game_state, (50 + 100*j, r), turn)
+                    draw_board(screen, player_names, player_rect, board_sprite, board_rect, game_state, (50 + 100*j, r), turn)
                     pygame.display.update() # update screen to show animation step
 
                 game_state[i][j] = turn
