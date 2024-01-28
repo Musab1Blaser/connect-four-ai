@@ -5,14 +5,160 @@ def rand_strat(game_state, options):
     return random.choice(options)
 
 def check_win(game_state, turn):
-    pass
     # row wise checking
+    for i in range(len(game_state)):
+        continuous = 0 # check for 4 contiguous in a row
+        for j in range(len(game_state[0])):
+            if game_state[i][j] == turn: # match
+                continuous += 1
+            else:
+                continuous = 0 # matching failed - restart matching
+
+            if continuous == 4: # matched successfully
+                print("Horizonal Win!") 
+                return True
 
     # column wise checking
+    for j in range(len(game_state[0])):
+        continuous = 0 # check for 4 contiguous in a row
+        for i in range(len(game_state)):
+            if game_state[i][j] == turn: # match
+                continuous += 1
+            else:
+                continuous = 0 # matching failed - restart matching
+
+            if continuous == 4: # matched successfully
+                print("Vertical Win!")
+                return True
 
     # main diagonal checking
+    for h in range(-3, 3): # iterate through possible diagonals
+        i, j = max(0, h), max(0, -h) # starting points of each diagonal
+        continuous = 0 # check for 4 contiguous in a row
+        while i < len(game_state) and j < len(game_state[0]):
+            if game_state[i][j] == turn: # match
+                continuous += 1
+            else:
+                continuous = 0 # matching failed - restart matching
+
+            if continuous == 4: # matched successfully
+                print("Main Diagonal Win!")
+                return True
+
+            i += 1
+            j += 1
 
     # off diagonal checking
+    for h in range(-3, 3): # iterate through possible diagonals
+        i, j = max(0, h), min(6, 6 + h) # starting points of each diagonal
+        continuous = 0 # check for 4 contiguous in a row
+        while i < len(game_state) and j >= 0:
+            if game_state[i][j] == turn:
+                continuous += 1 # match
+            else:
+                continuous = 0 # matching failed - restart matching
+
+            if continuous == 4: # matched successfully
+                print("Off Diagonal Win!")
+                return True
+
+            i += 1
+            j -= 1
+
+    return False
+
+def check_win_visual(clock, screen, player_names, player_rect, board_sprite, board_rect, game_state, turn):
+    animation_speed = 10
+
+    # row wise checking
+    draw_board(screen, player_names, player_rect, board_sprite, board_rect, game_state)
+    pygame.display.update()
+    for i in range(len(game_state)):
+        continuous = 0
+        for j in range(len(game_state[0])):
+            pygame.draw.circle(screen, (0x0, 0xff, 0x0), (50 + 100 * j, 350 + 100 * i), 40)
+            pygame.display.update()
+            clock.tick(animation_speed)
+            if game_state[i][j] == turn:
+                pygame.draw.circle(screen, (0x0, 0xaa, 0xaa), (50 + 100 * j, 350 + 100 * i), 40)
+                pygame.display.update()
+                continuous += 1
+            else:
+                continuous = 0
+
+            if continuous == 4:
+                print("Horizonal Win!")
+                return True
+
+    # column wise checking
+    draw_board(screen, player_names, player_rect, board_sprite, board_rect, game_state)
+    pygame.display.update()
+    for j in range(len(game_state[0])):
+        continuous = 0
+        for i in range(len(game_state)):
+            pygame.draw.circle(screen, (0x0, 0xff, 0x0), (50 + 100 * j, 350 + 100 * i), 40)
+            pygame.display.update()
+            clock.tick(animation_speed)
+            if game_state[i][j] == turn:
+                pygame.draw.circle(screen, (0x0, 0xaa, 0xaa), (50 + 100 * j, 350 + 100 * i), 40)
+                pygame.display.update()
+                continuous += 1
+            else:
+                continuous = 0
+
+            if continuous == 4:
+                print("Vertical Win!")
+                return True
+
+    # main diagonal checking
+    draw_board(screen, player_names, player_rect, board_sprite, board_rect, game_state)
+    pygame.display.update()
+    for h in range(-3, 3):
+        i, j = max(0, h), max(0, -h)
+        continuous = 0
+        while i < len(game_state) and j < len(game_state[0]):
+            pygame.draw.circle(screen, (0x0, 0xff, 0x0), (50 + 100 * j, 350 + 100 * i), 40)
+            pygame.display.update()
+            clock.tick(animation_speed)
+            if game_state[i][j] == turn:
+                pygame.draw.circle(screen, (0x0, 0xaa, 0xaa), (50 + 100 * j, 350 + 100 * i), 40)
+                pygame.display.update()
+                continuous += 1
+            else:
+                continuous = 0
+
+            if continuous == 4:
+                print("Main Diagonal Win!")
+                return True
+
+            i += 1
+            j += 1
+
+    # off diagonal checking
+    draw_board(screen, player_names, player_rect, board_sprite, board_rect, game_state)
+    pygame.display.update()
+    for h in range(-3, 3):
+        i, j = max(0, h), min(6, 6 + h)
+        continuous = 0
+        while i < len(game_state) and j >= 0:
+            pygame.draw.circle(screen, (0x0, 0xff, 0x0), (50 + 100 * j, 350 + 100 * i), 40)
+            pygame.display.update()
+            clock.tick(animation_speed)
+            if game_state[i][j] == turn:
+                pygame.draw.circle(screen, (0x0, 0xaa, 0xaa), (50 + 100 * j, 350 + 100 * i), 40)
+                pygame.display.update()
+                continuous += 1
+            else:
+                continuous = 0
+
+            if continuous == 4:
+                print("Off Diagonal Win!")
+                return True
+
+            i += 1
+            j -= 1
+
+    return False
 
 
 def draw_circles(board_sprite, game_state):
@@ -100,22 +246,25 @@ def run_game(strat1, start_name1,  strat2, strat_name2): # provide the two strat
 
         draw_board(screen, player_names, player_rect, board_sprite, board_rect, game_state) # show base screen
         
+        animation_speed = 60 # controls ball fall speed - recommended : 4
         if len(move_list): # if there are moves left to make, pass game to strategy functions
             if turn == 1:
                 i, j = strat1(game_state, move_list) # determine move
-                for r in range(100, 350 + 100 * i, 4): # animate ball falling
+                for r in range(100, 350 + 100 * i, animation_speed): # animate ball falling
                     draw_board(screen, player_names, player_rect, board_sprite, board_rect, game_state, (50 + 100*j, r), turn)
                     pygame.display.update() # update screen to show animation step
                 game_state[i][j] = turn
 
             elif turn == 2:
                 i, j = strat2(game_state, move_list) # determine move
-                for r in range(100, 350 + 100 * i, 4): # animate ball falling
+                for r in range(100, 350 + 100 * i, animation_speed): # animate ball falling
                     draw_board(screen, player_names, player_rect, board_sprite, board_rect, game_state, (50 + 100*j, r), turn)
                     pygame.display.update() # update screen to show animation step
                 game_state[i][j] = turn
 
+            # if check_win_visual(clock, screen, player_names, player_rect, board_sprite, board_rect, game_state, turn):
             if check_win(game_state, turn):
+                print(f"Last Move: {turn} - {i}, {j}")
                 turn = 0
             else:
                 turn = 3 - turn
@@ -123,5 +272,5 @@ def run_game(strat1, start_name1,  strat2, strat_name2): # provide the two strat
         pygame.display.update()
         clock.tick(60)
 
-
-run_game(rand_strat, "Rand1", rand_strat, "Rand2")
+while True:
+    run_game(rand_strat, "Rand1", rand_strat, "Rand2")
