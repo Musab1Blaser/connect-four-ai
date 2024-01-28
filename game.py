@@ -1,8 +1,7 @@
 import pygame
 import random
 
-def rand_strat(game_state, options):
-    return random.choice(options)
+from basic_strats import rand_strat, player_strat
 
 def check_win(game_state, turn):
     # row wise checking
@@ -160,7 +159,6 @@ def check_win_visual(clock, screen, player_names, player_rect, board_sprite, boa
 
     return False
 
-
 def draw_circles(board_sprite, game_state):
     for i in range(len(game_state)):
         for j in range(len(game_state[0])):
@@ -192,8 +190,6 @@ def draw_board(screen, player_names, player_rect, board_sprite, board_rect, game
     board_sprite.fill(board_color)
     draw_circles(board_sprite, game_state) # fill in circles/clear circle spaces
     screen.blit(board_sprite, board_rect)
-
-
 
 def run_game(strat1, start_name1,  strat2, strat_name2): # provide the two strategy functions
     game_state = [[0]*7 for i in range(6)] # generate empty board
@@ -245,8 +241,9 @@ def run_game(strat1, start_name1,  strat2, strat_name2): # provide the two strat
                         break
 
         draw_board(screen, player_names, player_rect, board_sprite, board_rect, game_state) # show base screen
+        pygame.display.update()
         
-        animation_speed = 60 # controls ball fall speed - recommended : 4
+        animation_speed = 4 # controls ball fall speed - recommended : 4
         if len(move_list): # if there are moves left to make, pass game to strategy functions
             if turn == 1:
                 i, j = strat1(game_state, move_list) # determine move
@@ -273,4 +270,4 @@ def run_game(strat1, start_name1,  strat2, strat_name2): # provide the two strat
         clock.tick(60)
 
 while True:
-    run_game(rand_strat, "Rand1", rand_strat, "Rand2")
+    run_game(rand_strat, "Rand1", player_strat, "Player")
