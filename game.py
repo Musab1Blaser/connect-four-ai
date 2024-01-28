@@ -206,9 +206,10 @@ def run_game(strat1, start_name1,  strat2, strat_name2): # provide the two strat
 
     # Player Names
     font = pygame.font.Font(None, 50)
+    fontLarge = pygame.font.Font(None, 80)
 
     # Names Canvas
-    player_names = pygame.Surface((700, 200), pygame.SRCALPHA)
+    player_names = pygame.Surface((700, 300), pygame.SRCALPHA)
     player_rect = player_names.get_rect(topleft = (0, 0))
 
     # Player 1 Canvas
@@ -260,14 +261,26 @@ def run_game(strat1, start_name1,  strat2, strat_name2): # provide the two strat
                 game_state[i][j] = turn
 
             # if check_win_visual(clock, screen, player_names, player_rect, board_sprite, board_rect, game_state, turn):
-            if check_win(game_state, turn):
+            if check_win(game_state, turn): # Game Won?
                 print(f"Last Move: {turn} - {i}, {j}")
+        
+                # Show Winner Name in their Colour
+                winner_name = fontLarge.render(start_name1 if turn == 1 else strat_name2, True, (0xde, 0x04, 0x04) if turn == 1 else (0xe2, 0xd7, 0x0c)) 
+                winner_rect = winner_name.get_rect(center = (350, 150))
+                player_names.blit(winner_name, winner_rect)
+
                 turn = 0
             else:
                 turn = 3 - turn
-        
+
+        elif turn != 0:
+            # Game Draw - Show Text
+            gamedraw = fontLarge.render("Draw", True, (0xff, 0xff, 0xff))
+            gamedraw_rect = gamedraw.get_rect(center = (350, 150))
+            player_names.blit(gamedraw, gamedraw_rect)
+
         pygame.display.update()
         clock.tick(60)
 
 while True:
-    run_game(rand_strat, "Rand1", player_strat, "Player")
+    run_game(player_strat, "Player1", player_strat, "Player2")
