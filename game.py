@@ -4,6 +4,17 @@ import random
 def rand_strat(game_state, options):
     return random.choice(options)
 
+def check_win(game_state, turn):
+    pass
+    # row wise checking
+
+    # column wise checking
+
+    # main diagonal checking
+
+    # off diagonal checking
+
+
 def draw_circles(board_sprite, game_state):
     for i in range(len(game_state)):
         for j in range(len(game_state[0])):
@@ -44,6 +55,7 @@ def run_game(strat1, start_name1,  strat2, strat_name2): # provide the two strat
     
     # pygame iniialisation
     pygame.init()
+    pygame.display.set_caption("Connect Four")
     clock = pygame.time.Clock()
 
     bg_color = (0, 0x23, 0x28)
@@ -79,11 +91,12 @@ def run_game(strat1, start_name1,  strat2, strat_name2): # provide the two strat
                 return
 
         move_list = [] # generate move list
-        for j in range(len(game_state[0])):
-            for i in range(len(game_state)-1, -1, -1):
-                if game_state[i][j] == 0:
-                    move_list.append((i, j))
-                    break
+        if turn != 0:
+            for j in range(len(game_state[0])):
+                for i in range(len(game_state)-1, -1, -1):
+                    if game_state[i][j] == 0:
+                        move_list.append((i, j))
+                        break
 
         draw_board(screen, player_names, player_rect, board_sprite, board_rect, game_state) # show base screen
         
@@ -93,18 +106,19 @@ def run_game(strat1, start_name1,  strat2, strat_name2): # provide the two strat
                 for r in range(100, 350 + 100 * i, 4): # animate ball falling
                     draw_board(screen, player_names, player_rect, board_sprite, board_rect, game_state, (50 + 100*j, r), turn)
                     pygame.display.update() # update screen to show animation step
-
                 game_state[i][j] = turn
-                turn = 2
 
             elif turn == 2:
                 i, j = strat2(game_state, move_list) # determine move
                 for r in range(100, 350 + 100 * i, 4): # animate ball falling
                     draw_board(screen, player_names, player_rect, board_sprite, board_rect, game_state, (50 + 100*j, r), turn)
                     pygame.display.update() # update screen to show animation step
-
                 game_state[i][j] = turn
-                turn = 1
+
+            if check_win(game_state, turn):
+                turn = 0
+            else:
+                turn = 3 - turn
         
         pygame.display.update()
         clock.tick(60)
