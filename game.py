@@ -1,5 +1,6 @@
 import pygame
 import random
+import matplotlib.pyplot as plt
 
 from basic_strats import rand_strat, player_strat
 
@@ -191,17 +192,19 @@ def draw_board(screen, player_names, player_rect, board_sprite, board_rect, game
     draw_circles(board_sprite, game_state) # fill in circles/clear circle spaces
     screen.blit(board_sprite, board_rect)
 
-def run_game(strat1, start_name1,  strat2, strat_name2): # provide the two strategy functions
+def run_game(screen, player1,  player2): # provide the two strategy functions
+    frame_limit = 10000
+
+    strat1, strat1_name = player1
+    strat2, strat2_name = player1
     game_state = [[0]*7 for i in range(6)] # generate empty board
+    result = 0
     turn = 1
     
     # pygame iniialisation
-    pygame.init()
-    pygame.display.set_caption("Connect Four")
     clock = pygame.time.Clock()
 
     bg_color = (0, 0x23, 0x28)
-    screen = pygame.display.set_mode((700, 900)) # create screen
     screen.fill(bg_color)
 
     # Player Names
@@ -213,11 +216,11 @@ def run_game(strat1, start_name1,  strat2, strat_name2): # provide the two strat
     player_rect = player_names.get_rect(topleft = (0, 0))
 
     # Player 1 Canvas
-    player1 = font.render(start_name1, True, (0xde, 0x04, 0x04))
+    player1 = font.render(strat1_name, True, (0xde, 0x04, 0x04))
     player1_rect = player1.get_rect(topleft = (20, 20))
     
     # Player 2 Canvas
-    player2 = font.render(strat_name2, True, (0xe2, 0xd7, 0x0c))
+    player2 = font.render(strat2_name, True, (0xe2, 0xd7, 0x0c))
     player2_rect = player1.get_rect(topright = (680, 20))
 
     # Placing names on Names Canvas
@@ -244,7 +247,7 @@ def run_game(strat1, start_name1,  strat2, strat_name2): # provide the two strat
         draw_board(screen, player_names, player_rect, board_sprite, board_rect, game_state) # show base screen
         pygame.display.update()
         
-        animation_speed = 4 # controls ball fall speed - recommended : 4
+        animation_speed = 600 # controls ball fall speed - recommended : 4
         if len(move_list): # if there are moves left to make, pass game to strategy functions
             if turn == 1:
                 i, j = strat1(game_state, move_list) # determine move
@@ -265,10 +268,11 @@ def run_game(strat1, start_name1,  strat2, strat_name2): # provide the two strat
                 print(f"Last Move: {turn} - {i}, {j}")
         
                 # Show Winner Name in their Colour
-                winner_name = fontLarge.render(start_name1 if turn == 1 else strat_name2, True, (0xde, 0x04, 0x04) if turn == 1 else (0xe2, 0xd7, 0x0c)) 
+                winner_name = fontLarge.render(strat1_name if turn == 1 else strat2_name, True, (0xde, 0x04, 0x04) if turn == 1 else (0xe2, 0xd7, 0x0c)) 
                 winner_rect = winner_name.get_rect(center = (350, 150))
                 player_names.blit(winner_name, winner_rect)
 
+                result = turn
                 turn = 0
             else:
                 turn = 3 - turn
@@ -278,9 +282,36 @@ def run_game(strat1, start_name1,  strat2, strat_name2): # provide the two strat
             gamedraw = fontLarge.render("Draw", True, (0xff, 0xff, 0xff))
             gamedraw_rect = gamedraw.get_rect(center = (350, 150))
             player_names.blit(gamedraw, gamedraw_rect)
+            turn = 0
 
         pygame.display.update()
-        clock.tick(60)
+        clock.tick(frame_limit)
 
-while True:
-    run_game(player_strat, "Player1", player_strat, "Player2")
+        if turn == 0:
+            for i in range(1000):
+                # pygame.quit()
+                return result
+
+# Player Initialisation
+players = [(rand_strat, "Rand1"), (rand_strat, "Rand2")]
+
+# Plotting - Labels, Value Initialisation, Colours
+labels = ["Draw", players[0][1], players[1][1]]
+values = [0, 0, 0]
+colors = [(0, 0x23, 0x28), (0xde, 0x04, 0x04), (0xe2, 0xd7, 0x0c)]
+colors = list(map(lambda x : tuple(map(lambda y : y/0xff, x)), colors))
+
+# Load Window
+pygame.init()
+pygame.display.set_caption("Connect Four")
+screen = pygame.display.set_mode((700, 900)) # create screen
+
+# Run Games
+for i in range(500):
+    values[run_game(screen, players[0], players[1])] += 1
+
+pygame.quit() # Close Window
+
+# Plot Results
+plt.bar(labels, values, color=colors)
+plt.show()
