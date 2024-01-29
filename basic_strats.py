@@ -1,10 +1,10 @@
 import pygame
 import random
 
-def rand_strat(game_state, options): # pick a random column to place
+def rand_strat(game_state, options, turn): # pick a random column to place
     return random.choice(options)
 
-def player_strat(game_state, options): # place on player click
+def player_strat(game_state, options, turn): # place on player click
     clock = pygame.time.Clock()
     while True:
         for event in pygame.event.get():

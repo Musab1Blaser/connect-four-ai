@@ -1,15 +1,18 @@
 import pygame
 import random
 import matplotlib.pyplot as plt
+import time
 
 from game_helpers import *
+
 from basic_strats import rand_strat, player_strat
+from minimax_strat import minimax_strat
 
 def run_game(screen, player1,  player2): # provide the two strategy functions
-    frame_limit = 10000
+    frame_limit = 60
 
     strat1, strat1_name = player1
-    strat2, strat2_name = player1
+    strat2, strat2_name = player2
     game_state = [[0]*7 for i in range(6)] # generate empty board
     result = 0
     turn = 1
@@ -30,11 +33,11 @@ def run_game(screen, player1,  player2): # provide the two strategy functions
 
     # Player 1 Canvas
     player1 = font.render(strat1_name, True, (0xde, 0x04, 0x04))
-    player1_rect = player1.get_rect(topleft = (20, 20))
+    player1_rect = player1.get_rect(topleft = (100, 20))
     
     # Player 2 Canvas
     player2 = font.render(strat2_name, True, (0xe2, 0xd7, 0x0c))
-    player2_rect = player1.get_rect(topright = (680, 20))
+    player2_rect = player1.get_rect(topright = (600, 20))
 
     # Placing names on Names Canvas
     player_names.blit(player1, player1_rect)
@@ -48,6 +51,9 @@ def run_game(screen, player1,  player2): # provide the two strategy functions
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
+            
+        draw_board(screen, player_names, player_rect, board_sprite, board_rect, game_state) # show base screen
+        pygame.display.update()
 
         move_list = [] # generate move list
         if turn != 0:
@@ -56,21 +62,24 @@ def run_game(screen, player1,  player2): # provide the two strategy functions
                     if game_state[i][j] == 0:
                         move_list.append((i, j))
                         break
-
-        draw_board(screen, player_names, player_rect, board_sprite, board_rect, game_state) # show base screen
-        pygame.display.update()
         
-        animation_speed = 600 # controls ball fall speed - recommended : 4
+        animation_speed = 4 # controls ball fall speed - recommended : 4
         if len(move_list): # if there are moves left to make, pass game to strategy functions
             if turn == 1:
-                i, j = strat1(game_state, move_list) # determine move
+                s = time.time()
+                i, j = strat1(game_state, move_list, turn) # determine move
+                e = time.time()
+                print(f"Response time for {turn} : {e - s}")
                 for r in range(100, 350 + 100 * i, animation_speed): # animate ball falling
                     draw_board(screen, player_names, player_rect, board_sprite, board_rect, game_state, (50 + 100*j, r), turn)
                     pygame.display.update() # update screen to show animation step
                 game_state[i][j] = turn
 
             elif turn == 2:
-                i, j = strat2(game_state, move_list) # determine move
+                s = time.time()
+                i, j = strat2(game_state, move_list, turn) # determine move
+                e = time.time()
+                print(f"Response time for {turn} : {e - s}")
                 for r in range(100, 350 + 100 * i, animation_speed): # animate ball falling
                     draw_board(screen, player_names, player_rect, board_sprite, board_rect, game_state, (50 + 100*j, r), turn)
                     pygame.display.update() # update screen to show animation step
@@ -92,21 +101,24 @@ def run_game(screen, player1,  player2): # provide the two strategy functions
 
         elif turn != 0:
             # Game Draw - Show Text
+            print("Draw")
             gamedraw = fontLarge.render("Draw", True, (0xff, 0xff, 0xff))
             gamedraw_rect = gamedraw.get_rect(center = (350, 150))
             player_names.blit(gamedraw, gamedraw_rect)
+
             turn = 0
 
+        draw_board(screen, player_names, player_rect, board_sprite, board_rect, game_state) # show base screen
         pygame.display.update()
         clock.tick(frame_limit)
 
         if turn == 0:
-            # for i in range(1000):
+            time.sleep(1)
+            return result
                 # pygame.quit()
-                return result
 
 # Player Initialisation
-players = [(rand_strat, "Rand1"), (rand_strat, "Rand2")]
+players = [(rand_strat, "Rand"), (minimax_strat, "Minimax")]
 
 # Plotting - Labels, Value Initialisation, Colours
 labels = ["Draw", players[0][1], players[1][1]]
@@ -120,7 +132,7 @@ pygame.display.set_caption("Connect Four")
 screen = pygame.display.set_mode((700, 900)) # create screen
 
 # Run Games
-for i in range(100):
+for i in range(200):
     print("Game No:", i+1)
     values[run_game(screen, players[0], players[1])] += 1
 
