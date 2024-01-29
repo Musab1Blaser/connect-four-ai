@@ -9,7 +9,8 @@ from basic_strats import rand_strat, player_strat
 from minimax_strat import minimax_strat
 
 def run_game(screen, player1,  player2): # provide the two strategy functions
-    frame_limit = 60
+    speed_mode = True
+    frame_limit = 10000 if speed_mode else 60
 
     strat1, strat1_name = player1
     strat2, strat2_name = player2
@@ -63,7 +64,7 @@ def run_game(screen, player1,  player2): # provide the two strategy functions
                         move_list.append((i, j))
                         break
         
-        animation_speed = 4 # controls ball fall speed - recommended : 4
+        animation_speed = 500 if speed_mode else 4 # controls ball fall speed - recommended : 4
         if len(move_list): # if there are moves left to make, pass game to strategy functions
             if turn == 1:
                 s = time.time()
@@ -113,7 +114,7 @@ def run_game(screen, player1,  player2): # provide the two strategy functions
         clock.tick(frame_limit)
 
         if turn == 0:
-            time.sleep(1)
+            # time.sleep(1)
             return result
                 # pygame.quit()
 
